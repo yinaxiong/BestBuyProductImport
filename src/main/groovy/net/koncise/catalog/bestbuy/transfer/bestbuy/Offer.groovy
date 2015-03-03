@@ -2,8 +2,6 @@ package net.koncise.catalog.bestbuy.transfer.bestbuy
 
 import com.fasterxml.jackson.annotation.JsonFormat
 
-import java.time.LocalDate
-
 class Offer {
     String id
     String heading

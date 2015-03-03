@@ -5,6 +5,10 @@ become more familiar with ElasticSearch.
 
 This project imports Best Buy's product archive into an ElasticSearch index.
 
+### Build Status
+
+[ ![Codeship Status for krichardson/BestBuyProductImport](https://codeship.com/projects/997c53b0-a381-0132-ce0c-366d28abf18c/status?branch=master)](https://codeship.com/projects/66056)
+
 ## Setting up your Environment
 
 First, you should obtain an API Key from Best Buy and add it to the application.properties. You can
