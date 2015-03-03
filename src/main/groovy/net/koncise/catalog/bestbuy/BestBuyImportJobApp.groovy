@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Import
 class BestBuyImportJobApp implements CommandLineRunner {
 
     @Autowired
-    ImportController importController
+    private ImportController importController
 
     @Autowired
-    Client elasticSearchClient
+    private Client elasticSearchClient
 
     public static void main(String... args) {
         SpringApplication.run(BestBuyImportJobApp, args)
@@ -38,7 +38,7 @@ class BestBuyImportJobApp implements CommandLineRunner {
             cli.usage()
             return
         }
-        Boolean skipDownload = !options.hasProperty('d')
+        Boolean skipDownload = !(options.d)
         importController.importProducts(skipDownload)
         elasticSearchClient.close()
     }

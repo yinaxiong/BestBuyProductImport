@@ -2,11 +2,13 @@ package net.koncise.catalog.bestbuy.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
+import net.koncise.catalog.bestbuy.converter.ProductIndexRequestConverter
 import net.koncise.catalog.bestbuy.transfer.bestbuy.Product
 import net.koncise.catalog.bestbuy.transfer.catalog.CategoryPathElement
 import net.koncise.catalog.bestbuy.transfer.catalog.ProductIndexRequest
 import org.elasticsearch.action.bulk.BulkRequestBuilder
 import org.elasticsearch.action.bulk.BulkResponse
+import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.client.Client
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,16 +20,19 @@ import org.springframework.stereotype.Component
 class CatalogIndexService {
 
     @Autowired
-    ObjectMapper objectMapper
+    private ObjectMapper objectMapper
 
     @Autowired
-    Client elasticSearchClient
+    private Client elasticSearchClient
+
+    @Autowired
+    private ProductIndexRequestConverter productIndexRequestConverter
 
     @Value('${elasticsearch.catalog}')
-    String catalogName
+    private String catalogName
 
     @Value('${elasticsearch.type.bestbuy}')
-    String bestBuyType
+    private String bestBuyType
 
     IndexResponse indexProduct(Product product) {
         log.info "Indexing product ${product.sku} named ${product.name}"
@@ -46,11 +51,12 @@ class CatalogIndexService {
         BulkRequestBuilder bulkRequest = elasticSearchClient.prepareBulk()
 
         productList.each { Product product ->
-            ProductIndexRequest indexRequest = createProductIndexRequest(product)
+            ProductIndexRequest indexRequest = productIndexRequestConverter.createProductIndexRequest(product)
+            String indexId = indexRequest.productId.toString()
+            IndexRequestBuilder indexRequestBuilder = elasticSearchClient.prepareIndex(catalogName, bestBuyType, indexId)
+            indexRequestBuilder.setSource(objectMapper.writeValueAsString(indexRequest))
             // either use client#prepare, or use Requests# to directly build index/delete requests
-            bulkRequest.add(elasticSearchClient
-                    .prepareIndex(catalogName, bestBuyType, indexRequest.productId)
-                    .setSource(objectMapper.writeValueAsString(indexRequest)))
+            bulkRequest.add(indexRequestBuilder)
         }
 
         BulkResponse bulkResponse = bulkRequest.execute().actionGet()

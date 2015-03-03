@@ -40,6 +40,7 @@ class FileImportService {
                 .url("${baseUrl}/v1/subsets/${fileName}?apiKey=${apiKey}")
                 .build()
 
+        log.info "Downloading file fom ${request.urlString()}"
         Response response = client.newCall(request).execute()
         InputStream inputStream = response.body().byteStream()
 
